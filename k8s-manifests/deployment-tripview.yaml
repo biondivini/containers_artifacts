@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpl-tripviewer
+  labels:
+    app: tripviewer
+spec:
+  selector:
+    matchLabels:
+      app: tripviewer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tripviewer
+    spec:
+      containers:
+      - name: app-tripviewer
+        image: registryltb1998.azurecr.io/tripviewer:latest 
+        ports:
+        - containerPort: 80
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: username
+        - name: SQL_SERVER
+          value: "sqlserverltb1998.database.windows.net"
+        - name: SQL_DBNAME
+          value: "mydrivingDB"
+        - name: TRIPS_API_ENDPOINT
+          value: http://trips
+        - name: USERPROFILE_API_ENDPOINT
+          value: http://userprofile
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-tripviewer
+spec:
+  selector:
+    app: tripviewer
+  ports:
+    - port: 8080
+      targetPort: 80
+  type: LoadBalancer
