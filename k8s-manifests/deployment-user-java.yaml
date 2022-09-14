@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  user-java
+  namespace: default
+  labels:
+    app:  user-java
+spec:
+  selector:
+    matchLabels:
+      app: user-java
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  user-java
+    spec:
+      containers:
+      - name:  user-java
+        image:  registryltb1998.azurecr.io/user-java:latest
+        env:
+        - name: SQL_USER
+          value: "sqladminlTb1998"
+        - name: SQL_SERVER
+          value: "sqlserverltb1998.database.windows.net"
+        - name: SQL_DBNAME
+          value: "mydrivingDB"
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass-java
+              key: password
+        ports:
+        - containerPort:  80
+          name:  user-java
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-java
+  namespace: default
+spec:
+  selector:
+    app: user-java
+  ports:
+  - name: user-java
+    protocol: TCP
+    port: 80
+---

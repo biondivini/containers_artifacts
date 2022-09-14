@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  userprofile
+  namespace: default
+  labels:
+    app:  userprofile
+spec:
+  selector:
+    matchLabels:
+      app: userprofile
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  userprofile
+    spec:
+      containers:
+      - name:  userprofile
+        image:  registryltb1998.azurecr.io/userprofile:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        livenessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+          periodSeconds: 10
+        env:
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: username
+        - name: SQL_SERVER
+          value: "sqlserverltb1998.database.windows.net"
+        - name: SQL_DBNAME
+          value: "mydrivingDB"
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-user-pass
+              key: password
+        ports:
+        - containerPort:  80
+          name:  userprofile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userprofile
+  namespace: default
+spec:
+  selector:
+    app: userprofile
+  ports:
+  - name: userprofile
+    protocol: TCP
+    port: 80
+---
