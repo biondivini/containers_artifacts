@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name:  trips
-  namespace: default
+  namespace: api
   labels:
     app:  trips
 spec:
@@ -35,28 +35,31 @@ spec:
           periodSeconds: 10
         env:
         - name: SQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-user-pass
-              key: username
+          value: "sqladminlTb1998"
         - name: SQL_SERVER
           value: "sqlserverltb1998.database.windows.net"
         - name: SQL_DBNAME
           value: "mydrivingDB"
-        - name: SQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-user-pass
-              key: password
         ports:
         - containerPort:  80
           name:  trips
+        volumeMounts:
+        - name: secrets-store01-inline
+          mountPath: "/secrets"
+          readOnly: true
+      volumes:
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "azure-kvname-user-msi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: trips
-  namespace: default
+  namespace: api
 spec:
   selector:
     app: trips

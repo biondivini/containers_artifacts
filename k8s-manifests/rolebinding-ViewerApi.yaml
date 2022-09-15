@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ViewerApi
+  namespace: api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: Viewer
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  namespace: api
+  name: 368f7716-ccef-448e-b517-f47061b5bbd8
